@@ -16,9 +16,30 @@ window.addEventListener("load", () => {
 
     function isChapterLast(title) {
         title = title.split(' ');
-        if (isNaN(parseInt(title[title.length - 1]))) return false;
-        if (!isNaN(parseInt(title[title.length - 2]))) return false;
-        return true;
+        return !isNaN(parseInt(title[title.length - 1])) && title[title.length - 2] === '-';
+    }
+    
+    function isValidChapter(title) {
+        title = title.split(' ');
+        const chap_idx = title.findIndex((e) => e === '-') + 1;
+        return !isNaN(parseInt(title[chap_idx]));
+    }
+
+    function fixChapter(title) {
+        title = title.split(' ');
+        const chap_idx = title.findIndex((e) => e === '-') + 1;
+        const chapter = title[chap_idx];
+        
+        let fixed_chapter;
+        try {
+            fixed_chapter = /\d+/.exec(chapter)[0];
+        }
+        catch (e) {
+            alert('An Error Occurred with "' + title.join(' ').split(' - ')[0] + '"');
+            return null;
+        }
+        title[chap_idx] = fixed_chapter;
+        return title.join(' ');
     }
 
     function processNode(node) {
@@ -33,8 +54,23 @@ window.addEventListener("load", () => {
 
             const titles = node.title.split(' / ');
             titles.forEach(title => {
+                if (!isValidChapter(title)) {
+                    const name = title.split(' - ')[0];
+                    alert('Incorrect Format for "' + name + '"');
+                    return;
+                }
+
+                // Fix Chapter Number
+                title = fixChapter(title);
+
+                if (!title) return;
+
                 const title_parts = title.split(' ');
-                if (!isChapterLast(title)) title_parts.pop();
+
+                while (!isChapterLast(title)) {
+                    title_parts.pop();
+                    title = title_parts.join(' ');
+                }
                 const site = document.createElement('h4');
                 site.class = 'site';
                 site.innerText = title_parts.join(' ');
@@ -64,13 +100,21 @@ window.addEventListener("load", () => {
             }
         } else if (node.url) {
             let node_title = node.title;
-            const title_parts = node_title.split(' ');
-            if (!isChapterLast(node_title)) {
-                const day = title_parts.pop();
-                node_title = title_parts.join(' ');
-                new_title += ` ${day}`;
-            }
-            if (node_title === old_title) {
+
+            const node_name = node_title.split(' - ');
+
+            if (node_name[0] === old_title.split(' - ')[0]) {
+                // Fix Chapter Number
+                node_title = fixChapter(node_title);
+
+                const title_parts = node_title.split(' ');
+
+                while (!isChapterLast(node_title)) {
+                    const thing = title_parts.pop();
+                    node_title = title_parts.join(' ');
+                    new_title += ` ${thing}`;
+                }
+                
                 chrome.bookmarks.update(node.id, {title: new_title});
             }
         }
