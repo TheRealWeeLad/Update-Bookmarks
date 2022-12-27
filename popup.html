@@ -7,13 +7,21 @@
     </head>
 
     <body>
-        <button class="preset" id="mon">mon</button>
-        <button class="preset" id="man">man</button>
-        <form>
-            <label for="folder">Folder Name</label>
-            <input type="text" id="folder" value="man gg">
-        </form>
-        <button id="update">Update</button>
+        <div id="head">
+            <div id="form">
+                <form>
+                    <label for="folder">Folder Name</label>
+                    <input type="text" id="folder">
+                </form>
+                <button id="update">Update</button>
+                <button id="preset">Add Preset</button>
+                <button id="preset_rem">Remove Preset</button>
+                <button id="default">Set Default</button>
+            </div>
+            <div id="presets">
+                <h2 id="preset-header">Presets</h2>
+            </div>
+        </div>
 
         <div id="sites-container">
             <h2>Sites: </h2>
