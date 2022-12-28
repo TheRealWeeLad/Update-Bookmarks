@@ -6,7 +6,10 @@ window.addEventListener("load", () => {
         let default_input = items.default;
 
         // Set default if none exists
-        if (!default_input) default_input = '';
+        if (!default_input) { 
+            default_input = '';
+            chrome.storage.local.set({"default": ""});
+        }
 
         input.value = default_input;
         update();
@@ -185,6 +188,11 @@ window.addEventListener("load", () => {
     function update_preset_buttons() {
         chrome.storage.local.get('presets', (items) => {
             const presets = items.presets;
+
+            if (!presets) {
+                chrome.storage.local.set({'presets': []});
+                return;
+            }
 
             const preset_div = document.getElementById('presets');
 
