@@ -18,6 +18,7 @@ window.addEventListener("load", () => {
     let folder_name;
     const sites_div = document.getElementById('sites-container');
 
+    // Set update handler
     const update_button = document.getElementById('update');
     update_button.addEventListener('click', update);
 
@@ -30,6 +31,14 @@ window.addEventListener("load", () => {
     // Set default handler
     const default_button = document.getElementById('default');
     default_button.addEventListener('click', set_default);
+
+    // Set import and export handlers
+    const import_input = document.getElementById('import-input');
+    import_input.addEventListener('change', import_list);
+    const import_button = document.getElementById('import');
+    import_button.addEventListener('click', () => import_input.click());
+    const export_button = document.getElementById('export');
+    export_button.addEventListener('click', export_list);
 
     update();
 
@@ -114,7 +123,7 @@ window.addEventListener("load", () => {
         if (node.children) {
             if (!node.parentId || node.title === 'Bookmarks bar' || node.title === folder_name) {
                 node.children.forEach(child => {
-                    return processNodeChapter(child, old_title, new_title);
+                    processNodeChapter(child, old_title, new_title);
                 });
             }
         } else if (node.url) {
@@ -249,5 +258,106 @@ window.addEventListener("load", () => {
 
     function set_default() {
         chrome.storage.local.set({"default": input.value});
+    }
+
+    const comma_replacer = '&!!##--@!!';
+    const return_comma = new RegExp(`${comma_replacer}`, 'g');
+
+    function add_bookmark_folder(sites) {
+        chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
+            // Check for existing folder
+            chrome.bookmarks.getChildren(root.id, (children) => {
+                children.forEach((child) => {
+                    const name = child.title.replace(/,/g, comma_replacer);
+                    
+                    // Delete existing folder if one already exists
+                    if (sites[0] === name) {
+                        chrome.bookmarks.getChildren(child.id, (dumb_sites) => {
+                            // Get rid of the stupid sites (YUCK!!)
+                            dumb_sites.forEach((site) => {
+                                chrome.bookmarks.remove(site.id);
+                            });
+                            chrome.bookmarks.remove(child.id);
+                        });
+                    }
+                });
+
+                // Create a new folder to put sites in
+                const folder_title = sites[0].replace(return_comma, ',');
+                chrome.bookmarks.create({
+                    'title': folder_title,
+                    'parentId': '1'
+                }, (new_folder) => {
+                    sites.shift();
+
+                    for (let i = 0; i < sites.length; i += 2) {
+                        const title = sites[i].replace(return_comma, ',');
+                        const url = sites[i + 1].replace(return_comma, ',');
+
+                        chrome.bookmarks.create({
+                            'title': title,
+                            'url': url,
+                            'parentId': new_folder.id
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    function import_list() {
+        const file = import_input.files[0];
+        const reader = new FileReader();
+
+        reader.addEventListener('load', (event) => {
+            const sites = event.target.result.split(',');
+
+            if (sites.length < 3 || !sites[2].startsWith('http')) {
+                alert('Incorrect List Format');
+                return;
+            }
+
+            add_bookmark_folder(sites);
+
+            input.value = sites[0].replace(return_comma, ',');
+
+            setTimeout(update, 200);
+        });
+
+        reader.readAsText(file);
+    }
+
+    // I LOVE NESTING
+    function export_list() {
+        chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
+            chrome.bookmarks.getChildren(root.id, (children) => {
+                children.forEach((child) => {
+                    if (child.title === folder_name) {
+                        chrome.bookmarks.getChildren(child.id, (sites) => {
+                            let export_data = folder_name.replace(/,/g, comma_replacer) + ',';
+
+                            sites.forEach((site) => {
+                                let title = site.title;
+                                title = title.replace(/,/g, comma_replacer);
+                                let url = site.url;
+                                url = url.replace(/,/g, comma_replacer);
+
+                                export_data += title + ',' + url + ',';
+                            });
+
+                            export_data = export_data.substring(0, export_data.length - 1);
+
+                            const blob = new Blob([export_data], {type: "text/csv"});
+                            const url = URL.createObjectURL(blob);
+
+                            chrome.downloads.download({
+                                url: url,
+                                filename: "site_list.csv"
+                            });
+                        });
+                    }
+                });
+            });
+        });
     }
 });

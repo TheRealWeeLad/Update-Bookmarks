@@ -38,6 +38,22 @@ button:hover {
     background-color: #770000;
 }
 
+#import {
+    float: left;
+}
+
+#import-input {
+    display: none;
+}
+
+#export {
+    float: right;
+}
+
+#import, #export {
+    margin-bottom: 10px;
+}
+
 .site {
     font-size: 15px;
     width: 100%;
