@@ -11,8 +11,8 @@ input {
     margin-bottom: 5px;
 }
 
-form {
-    margin-top: 0px;
+#folder {
+    width: 40%;
 }
 
 button {

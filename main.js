@@ -1,5 +1,6 @@
 window.addEventListener("load", () => {
-    const input = document.getElementById('folder');
+    const selector = document.getElementById('folder');
+    selector.addEventListener('change', update);
 
     // Change Input Value to Default Value
     chrome.storage.local.get('default', (items) => {
@@ -11,11 +12,13 @@ window.addEventListener("load", () => {
             chrome.storage.local.set({"default": ""});
         }
 
-        input.value = default_input;
+        // Set Folder Options
+        set_folder_options(default_input);
+
         update();
     });
 
-    let folder_name;
+    let folder_name = selector.value;
     const sites_div = document.getElementById('sites-container');
 
     // Set update handler
@@ -40,7 +43,13 @@ window.addEventListener("load", () => {
     const export_button = document.getElementById('export');
     export_button.addEventListener('click', export_list);
 
-    update();
+    function do_sussy_things_to_bookmarks(sussy) {
+        chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
+            chrome.bookmarks.getChildren(root.id, (children) => {
+                children.forEach(sussy);
+            });
+        });
+    }
 
     function isChapterLast(title) {
         title = title.split(' ');
@@ -148,6 +157,18 @@ window.addEventListener("load", () => {
         }
     }
 
+    function set_folder_options(default_option) {
+        do_sussy_things_to_bookmarks((bookmark) => {
+            if (bookmark.url) return;
+
+            const option = document.createElement('option');
+            option.value, option.textContent = bookmark.title;
+            selector.appendChild(option);
+        });
+        
+        setTimeout(() => { selector.value = default_option; update(); }, 100);
+    }
+
     function increment(site, add) {
         site_parts = site.innerText.split(' - ')
         const old_site_title = site.innerText;
@@ -179,7 +200,7 @@ window.addEventListener("load", () => {
     function update() {
         sites_div.innerHTML = '<h2>Sites: </h2>';
 
-        folder_name = input.value;
+        folder_name = selector.value;
 
         update_preset_buttons();
 
@@ -216,7 +237,7 @@ window.addEventListener("load", () => {
 
                 // Update event handlers
                 new_preset.addEventListener('click', () => {
-                    input.value = preset;
+                    selector.value = preset;
                     update();
                 });
             });
@@ -228,9 +249,9 @@ window.addEventListener("load", () => {
         chrome.storage.local.get('presets', (items) => {
             const presets = items.presets;
 
-            if (presets.includes(input.value)) return;
+            if (presets.includes(folder_name)) return;
 
-            presets.push(input.value);
+            presets.push(folder_name);
 
             chrome.storage.local.set({"presets": presets});
 
@@ -244,9 +265,9 @@ window.addEventListener("load", () => {
         chrome.storage.local.get('presets', (items) => {
             let presets = items.presets;
 
-            if (!presets.includes(input.value)) return;
+            if (!presets.includes(folder_name)) return;
 
-            const item_idx = presets.indexOf(input.value);
+            const item_idx = presets.indexOf(folder_name);
             presets = presets.slice(0, item_idx).concat(presets.slice(item_idx + 1));
             
             chrome.storage.local.set({"presets": presets});
@@ -257,7 +278,7 @@ window.addEventListener("load", () => {
     }
 
     function set_default() {
-        chrome.storage.local.set({"default": input.value});
+        chrome.storage.local.set({"default": folder_name});
     }
 
     const comma_replacer = '&!!##--@!!';
@@ -319,45 +340,40 @@ window.addEventListener("load", () => {
 
             add_bookmark_folder(sites);
 
-            input.value = sites[0].replace(return_comma, ',');
+            selector.value = sites[0].replace(return_comma, ',');
 
-            setTimeout(update, 200);
+            setTimeout(update, 100);
         });
 
         reader.readAsText(file);
     }
 
-    // I LOVE NESTING
     function export_list() {
-        chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
-            chrome.bookmarks.getChildren(root.id, (children) => {
-                children.forEach((child) => {
-                    if (child.title === folder_name) {
-                        chrome.bookmarks.getChildren(child.id, (sites) => {
-                            let export_data = folder_name.replace(/,/g, comma_replacer) + ',';
+        do_sussy_things_to_bookmarks((bookmark) => {
+            if (bookmark.title === folder_name) {
+                chrome.bookmarks.getChildren(bookmark.id, (sites) => {
+                    let export_data = folder_name.replace(/,/g, comma_replacer) + ',';
 
-                            sites.forEach((site) => {
-                                let title = site.title;
-                                title = title.replace(/,/g, comma_replacer);
-                                let url = site.url;
-                                url = url.replace(/,/g, comma_replacer);
+                    sites.forEach((site) => {
+                        let title = site.title;
+                        title = title.replace(/,/g, comma_replacer);
+                        let url = site.url;
+                        url = url.replace(/,/g, comma_replacer);
 
-                                export_data += title + ',' + url + ',';
-                            });
+                        export_data += title + ',' + url + ',';
+                    });
 
-                            export_data = export_data.substring(0, export_data.length - 1);
+                    export_data = export_data.substring(0, export_data.length - 1);
 
-                            const blob = new Blob([export_data], {type: "text/csv"});
-                            const url = URL.createObjectURL(blob);
+                    const blob = new Blob([export_data], {type: "text/csv"});
+                    const url = URL.createObjectURL(blob);
 
-                            chrome.downloads.download({
-                                url: url,
-                                filename: "site_list.csv"
-                            });
-                        });
-                    }
+                    chrome.downloads.download({
+                        url: url,
+                        filename: "site_list.csv"
+                    });
                 });
-            });
+            }
         });
     }
 });
