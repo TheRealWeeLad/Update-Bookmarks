@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
 
-    "name": "Update Chapter",
-    "description": "OMG NEW CHAPTER 😲",
+    "name": "Update Bookmarks",
+    "description": "OMG 🤯",
     "version": "1.0",
     "background": {
         "service_worker": "background.js"
