@@ -353,6 +353,7 @@ window.addEventListener("load", () => {
             if (bookmark.title === folder_name) {
                 chrome.bookmarks.getChildren(bookmark.id, (sites) => {
                     let export_data = folder_name.replace(/,/g, comma_replacer) + ',';
+                    const title = export_data.substring(0, export_data.length - 1).replace(/ /g, '_');
 
                     sites.forEach((site) => {
                         let title = site.title;
@@ -370,7 +371,7 @@ window.addEventListener("load", () => {
 
                     chrome.downloads.download({
                         url: url,
-                        filename: "site_list.csv"
+                        filename: `${title}.csv`
                     });
                 });
             }
