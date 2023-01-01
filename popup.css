@@ -1,5 +1,5 @@
 label {
-    font-size: 15px;
+    font-size: 20px;
     color: green;
 }
 
@@ -13,6 +13,7 @@ input {
 
 #folder {
     width: 40%;
+    font-size: 15px;
 }
 
 button {
@@ -21,21 +22,11 @@ button {
     background-color: blue;
     color: white;
     border: 2px solid black;
+    font-size: 15px;
 }
 
 button:hover {
     background-color: #000077;
-}
-
-.preset {
-    margin-top: 0px;
-    margin-bottom: 5px;
-    margin-left: 10px;
-    background-color: red;
-}
-
-.preset:hover {
-    background-color: #770000;
 }
 
 #import {
@@ -73,25 +64,4 @@ img {
 
 img:hover {
     filter: blur(1px);
-}
-
-#head {
-    display: flex;
-}
-
-#form {
-    float: left;
-    width: 50%;
-}
-
-#presets {
-    float: right;
-    width: 50%;
-}
-
-#preset-header {
-    text-align: center;
-    color: red;
-    margin-top: 0px;
-    margin-bottom: 5px;
 }

@@ -25,12 +25,6 @@ window.addEventListener("load", () => {
     const update_button = document.getElementById('update');
     update_button.addEventListener('click', update);
 
-    // SET PRESET HANDLER
-    const add_preset_button = document.getElementById('preset');
-    add_preset_button.addEventListener('click', add_preset);
-    const remove_preset_button = document.getElementById('preset_rem');
-    remove_preset_button.addEventListener('click', remove_preset);
-
     // Set default handler
     const default_button = document.getElementById('default');
     default_button.addEventListener('click', set_default);
@@ -202,8 +196,6 @@ window.addEventListener("load", () => {
 
         folder_name = selector.value;
 
-        update_preset_buttons();
-
         if (folder_name === '') {
             return;
         }
@@ -212,68 +204,6 @@ window.addEventListener("load", () => {
             bmTree.forEach(node => {
                 processNode(node);
             });
-        });
-    }
-
-    function update_preset_buttons() {
-        chrome.storage.local.get('presets', (items) => {
-            const presets = items.presets;
-
-            if (!presets) {
-                chrome.storage.local.set({'presets': []});
-                return;
-            }
-
-            const preset_div = document.getElementById('presets');
-
-            // Reset presets
-            preset_div.innerHTML = '<h2 id="preset-header">Presets</h2>';
-
-            presets.forEach((preset) => {
-                const new_preset = document.createElement('button');
-                new_preset.className = 'preset';
-                new_preset.textContent = preset;
-                preset_div.appendChild(new_preset);
-
-                // Update event handlers
-                new_preset.addEventListener('click', () => {
-                    selector.value = preset;
-                    update();
-                });
-            });
-        });
-    }
-
-    function add_preset() {
-        // Update Storage
-        chrome.storage.local.get('presets', (items) => {
-            const presets = items.presets;
-
-            if (presets.includes(folder_name)) return;
-
-            presets.push(folder_name);
-
-            chrome.storage.local.set({"presets": presets});
-
-            // Update Buttons
-            update_preset_buttons();
-        });
-    }
-
-    function remove_preset() {
-        // Update Storage
-        chrome.storage.local.get('presets', (items) => {
-            let presets = items.presets;
-
-            if (!presets.includes(folder_name)) return;
-
-            const item_idx = presets.indexOf(folder_name);
-            presets = presets.slice(0, item_idx).concat(presets.slice(item_idx + 1));
-            
-            chrome.storage.local.set({"presets": presets});
-
-            // Update Buttons
-            update_preset_buttons();
         });
     }
 
