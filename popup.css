@@ -51,11 +51,22 @@ button:hover {
 }
 
 img {
-    display: block;
+    border: 2px solid black;
+    width: inherit;
+    height: inherit;
+}
+
+#arrows {
     width: 15px;
     height: 15px;
-    border: 2px solid black;
+    vertical-align: middle;
+}
+
+.inc {
+    display: block;
     float: right;
+    width: 15px;
+    height: 15px;
     margin-left: 5px;
     margin-right: 5px;
     margin-top: auto;

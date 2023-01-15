@@ -37,6 +37,13 @@ window.addEventListener("load", () => {
     const export_button = document.getElementById('export');
     export_button.addEventListener('click', export_list);
 
+    // Set Forward and Back Arrow Handlers
+    const arrow_container = document.querySelector('#arrows');
+    const back_arrow = arrow_container.children.item(0);
+    back_arrow.addEventListener('click', () => changeFolder(-1));
+    const forward_arrow = arrow_container.children.item(1);
+    forward_arrow.addEventListener('click', () => changeFolder(1));
+
     function do_sussy_things_to_bookmarks(sussy) {
         chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
             chrome.bookmarks.getChildren(root.id, (children) => {
@@ -108,8 +115,10 @@ window.addEventListener("load", () => {
 
                 const plus = document.createElement('img');
                 plus.src = 'plus.png';
+                plus.className = 'inc';
                 const minus = document.createElement('img');
                 minus.src = 'minus.png';
+                minus.className = 'inc';
 
                 site.appendChild(minus);
                 site.appendChild(plus);
@@ -161,6 +170,22 @@ window.addEventListener("load", () => {
         });
         
         setTimeout(() => { selector.value = default_option; update(); }, 100);
+    }
+
+    function changeFolder(dF) {
+        chrome.bookmarks.getRootByName('bookmarks_bar', (root) => {
+            chrome.bookmarks.getChildren(root.id, (children) => {
+                const folders = [];
+                for (let i = 0; i < children.length; i++) {
+                    if (!children[i].url) folders.push(children[i]);
+                }
+
+                const curr_folder_idx = folders.findIndex((e) => e.title === folder_name);
+                const new_folder = folders[curr_folder_idx + dF];
+                selector.value = new_folder.title;
+                update();
+            });
+        });
     }
 
     function increment(site, add) {
