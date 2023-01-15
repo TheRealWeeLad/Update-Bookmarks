@@ -181,7 +181,9 @@ window.addEventListener("load", () => {
                 }
 
                 const curr_folder_idx = folders.findIndex((e) => e.title === folder_name);
-                const new_folder = folders[curr_folder_idx + dF];
+                let new_folder_idx = curr_folder_idx + dF;
+                new_folder_idx = new_folder_idx >= folders.length ? 0 : (new_folder_idx < 0 ? folders.length - 1 : new_folder_idx);
+                const new_folder = folders[new_folder_idx];
                 selector.value = new_folder.title;
                 update();
             });
