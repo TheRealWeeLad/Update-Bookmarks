@@ -80,12 +80,18 @@ window.addEventListener("load", () => {
         return title.join(' ');
     }
 
+    let invalidTitles = [];
+
     function processNode(node) {
         if (node.children) {
             if (!node.parentId || node.title === 'Bookmarks bar' || node.title === folder_name) {
                 node.children.forEach(child => {
                     processNode(child);
                 });
+                if (invalidTitles.length > 0) {
+                    alert('Invalid Format for: \n' + invalidTitles.join('\n'));
+                }
+                invalidTitles = [];
             }
         } else if (node.url) {
             if (node.parentId === '1') return;
@@ -94,7 +100,7 @@ window.addEventListener("load", () => {
             titles.forEach(title => {
                 if (!isValidChapter(title)) {
                     const name = title.split(' - ')[0];
-                    alert('Incorrect Format for "' + name + '"');
+                    invalidTitles.push(name);
                     return;
                 }
 
