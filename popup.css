@@ -1,6 +1,14 @@
+body {
+    color: beige;
+}
+
 label {
     font-size: 20px;
     color: green;
+}
+
+h2 {
+    color: lightgray;
 }
 
 div {
@@ -54,6 +62,7 @@ img {
     border: 2px solid black;
     width: inherit;
     height: inherit;
+    filter: invert(0.8);
 }
 
 #arrows {
@@ -74,5 +83,5 @@ img {
 }
 
 img:hover {
-    filter: blur(1px);
+    filter: invert(0.8) blur(1px);
 }
